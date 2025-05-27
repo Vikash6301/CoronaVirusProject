@@ -1,40 +1,31 @@
-from plyer import notification
 import requests
-from bs4 import BeautifulSoup 
+import bs4
+
+import tkinter as tk
+import plyer
+
 import time
+import datetime
 
-def notifyMe(title, message):
-    notification.notify(
-        title = title,
-        message = message,
-        app_icon ="C:\\Users\\DELL\\Desktop\\Notification System\\COVID-19-Notification-System\\icon.ico",
-        timeout = 6
-    )
-def getData(url):
-    r=requests.get(url)
-    return r.text
+def get_html_data(url):
+    data = requests.get(url)
+    return data 
 
-if __name__ == "__main__":
-    while True:
-        #notifyMe("Hey Smile", "Enjoying vacations?")
-        myHTMLData = getData('https://www.mohfw.gov.in/')
-        #print(myHTMLData)
-        soup = BeautifulSoup(myHTMLData, 'html.parser')
-        # print(soup.prettify())
-        myDataStr = ""
-        for tr in soup.find_all('tbody')[1].find_all('tr'):
-            #print(tr.get_text())
-            myDataStr +=tr.get_text()
-        myDataStr=myDataStr[1:]
-        itemList= myDataStr.split("\n\n")
 
-        states=['Punjab', 'Uttar Pradesh', 'Chandigarh', 'Haryana']
-        for item in itemList[0:23]:
-            dataList= item.split("\n")
-            if dataList[1] in states:
-                #print(dataList)
-                nTitle = 'Cases of COVID-19'
-                nText =f"State {dataList[1]}\n Indian : {dataList[2]} & Foreign : {dataList[3]}\n Cured : {dataList[4]}\n Deaths : {dataList[5]}"
-                notifyMe(nTitle, nText)
-                time.sleep(2)
-        time.sleep(3600)
+def get_corona_details_of_world():
+    url="https://covid19dashboard.mohfw.gov.in/"
+
+    html_data = get_html_data(url)
+
+    bs=bs4.BeautifulSoup(html_data.text,'html.parser')
+
+    info_div= bs.find ("div",class_="col-xs-7 site-stats-count").find("ul").find_all("li")
+    #print(info_div)
+    for item in info_div[0:2]:
+        text = item.find("span",class_="mob-show").get_text()
+        count = item.find("strong",class_="mob-hide").get_text()
+        print(count)
+    
+   
+get_corona_details_of_world()
+
